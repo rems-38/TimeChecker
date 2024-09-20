@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from classes.ui import UI
+from utils.ui import UI
 
 
 if __name__ == "__main__":
