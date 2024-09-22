@@ -1,3 +1,9 @@
 {
-    "calendarId": "<enter your calendar id>"
+    "calendarId": "....@group.calendar.google.com",
+    "email_name": "John Doe",
+    "email_host": "smtp.office365.com",
+    "email_user": "john@my_office.com",
+    "email_password": "SuperPaswword",
+    "email_recipient": "alice@my_office.com",
+    "email_signature": "<div id=\"Signature\">...<div>"
 }
