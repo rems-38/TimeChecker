@@ -2,8 +2,14 @@
 
 import datetime
 from dateutil.relativedelta import relativedelta
+
 import os.path
 import json
+
+import smtplib
+from email.message import EmailMessage
+from email.utils import formataddr
+from email.header import Header
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -82,7 +88,8 @@ def generate_report(service_google):
     if not events: return
 
     total = datetime.timedelta()
-    with open("hours_report_" + now.strftime("%B") + ".csv", "w") as file:
+    filename = "hours_report_" + now.strftime("%B") + ".csv"
+    with open(filename, "w") as file:
         file.write("N°,Début,Fin,Durée\n")
         for nb, event in enumerate(events, 1):
             start = event["start"].get("dateTime", event["start"].get("date"))
@@ -93,3 +100,24 @@ def generate_report(service_google):
             file.write(f"{nb},{start},{end},{duration}\n")
 
         file.write(f"Total,,,{total}\n")
+
+
+    msg = EmailMessage()
+    msg["Subject"] = "Rapport mensuel"
+    msg["From"] = formataddr((str(Header(get_json_key("name"), "utf-8")), get_json_key("email_user")))
+    msg["To"] = get_json_key("email_recipient")
+
+    msg.add_alternative("<p>Veuillez trouver ci-joint le rapport détaillée de toutes les heures que j'ai effectuée durant ce mois.</p>" + get_json_key("email_signature"), subtype="html")
+
+    with open(filename, "rb") as file:
+        msg.add_attachment(file.read(), maintype="text", subtype="csv", filename=filename)
+
+    srv = smtplib.SMTP(get_json_key("email_host"), 587)
+    srv.starttls()
+    srv.login(get_json_key("email_user"), get_json_key("email_password"))
+    srv.send_message(msg)
+    srv.quit()
+
+    os.remove(filename)
+    
+    print("Report sent")
