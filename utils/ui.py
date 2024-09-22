@@ -12,22 +12,34 @@ class UI(tk.CTk):
         self.title("Time Checker")
         self.geometry("400x400")
         self.resizable(False, False)
-        tk.set_default_color_theme("dark-blue") # fonctionne pas à voir pk
         
     def load(self):
 
-        title = tk.CTkLabel(self, text="Time Checker", font=("Arial", 24))
+        self.title = tk.CTkLabel(self, text="Time Checker", font=("Arial", 24))
 
-        sync_button = tk.CTkButton(self, text="Synchroniser l'agenda Google", command=google_sync)
+        self.sync_button = tk.CTkButton(self, text="Synchroniser l'agenda Google", command=self.google_sync)
 
-        quit_button = tk.CTkButton(self, text="Quitter", command=self.quit)
+        self.quit_button = tk.CTkButton(self, text="Quitter", command=self.quit)
 
-        play_button = tk.CTkButton(self, text="▶️", font=("Arial", 24), command=timer_start)
-        report_button = tk.CTkButton(self, text="Générer le rapport mensuel", command=generate_report)
+        self.play_button = tk.CTkButton(self, text="▶️", font=("Arial", 24), command=self.timer_start)
+        self.report_button = tk.CTkButton(self, text="Générer le rapport mensuel", command=generate_report)
 
-        title.pack(pady=20)
-        sync_button.pack(pady=20)
-        play_button.pack(pady=20)
-        report_button.pack(pady=20)
-        quit_button.pack(pady=20)
-        
+        self.title.pack(pady=20)
+        self.sync_button.pack(pady=20)
+        self.play_button.pack(pady=20)
+        self.report_button.pack(pady=20)
+        self.quit_button.pack(pady=20)
+
+
+    def google_sync(self):
+        self.service_google = google_sync()
+
+
+    def timer_start(self):
+        self.start_time = timer_start()
+        self.play_button.configure(text="⏸️", command=self.timer_stop)
+
+
+    def timer_stop(self):
+        timer_stop(self.service_google, self.start_time)
+        self.play_button.configure(text="▶️", command=self.timer_start)
