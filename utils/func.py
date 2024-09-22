@@ -33,11 +33,11 @@ def google_sync():
     return build("calendar", "v3", credentials=creds)
 
 
-def get_calendar_id():
+def get_json_key(key):
     with open("config.json", "r") as file:
         config = json.load(file)
 
-    return config.get("calendarId", "primary")
+    return config.get(key)
 
 
 def timer_start():
@@ -55,7 +55,7 @@ def timer_stop(service_google, start_time):
     }
 
     try:
-        service_google.events().insert(calendarId=get_calendar_id(), body=event).execute()
+        service_google.events().insert(calendarId=get_json_key("calendarId"), body=event).execute()
     except HttpError as e:
         print(f"An error occurred: {e}")
     
@@ -71,7 +71,7 @@ def generate_report(service_google):
     endIso = end.isoformat() + 'Z'
 
     events_result = (service_google.events().list(
-        calendarId=get_calendar_id(),
+        calendarId=get_json_key("calendarId"),
         timeMin=startIso,
         timeMax=endIso,
         orderBy="startTime",
