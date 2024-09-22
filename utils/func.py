@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from dateutil.relativedelta import relativedelta
 import os.path
 import json
 
@@ -61,7 +62,34 @@ def timer_stop(service_google, start_time):
     print("Event added")
 
 
-def generate_report():
-    print("Génération du rapport mensuel...")
+def generate_report(service_google):
+    now = datetime.datetime.now()
+    start = datetime.datetime(now.year, now.month, 1)
+    end = start + relativedelta(months=1) - relativedelta(days=2)
 
+    startIso = start.isoformat() + 'Z'
+    endIso = end.isoformat() + 'Z'
 
+    events_result = (service_google.events().list(
+        calendarId=get_calendar_id(),
+        timeMin=startIso,
+        timeMax=endIso,
+        orderBy="startTime",
+        singleEvents=True,
+    ).execute())
+    events = events_result.get("items", [])
+
+    if not events: return
+
+    total = datetime.timedelta()
+    with open("hours_report_" + now.strftime("%B") + ".csv", "w") as file:
+        file.write("N°,Début,Fin,Durée\n")
+        for nb, event in enumerate(events, 1):
+            start = event["start"].get("dateTime", event["start"].get("date"))
+            end = event["end"].get("dateTime", event["end"].get("date"))
+            duration = datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start)
+            total += duration
+            
+            file.write(f"{nb},{start},{end},{duration}\n")
+
+        file.write(f"Total,,,{total}\n")
