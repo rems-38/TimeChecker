@@ -98,8 +98,12 @@ def generate_report(service_google):
             total += duration
             
             file.write(f"{nb},{start},{end},{duration}\n")
+ 
 
-        file.write(f"Total,,,{total}\n")
+        hours = total.days * 24 + total.seconds // 3600
+        minutes = (total.seconds % 3600) // 60
+        seconds = total.seconds % 60
+        file.write(f"Total,,,{hours}:{minutes}:{seconds}\n")
 
 
     msg = EmailMessage()
