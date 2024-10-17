@@ -30,7 +30,12 @@ def google_sync():
         creds = flow.run_local_server(port=0)
     
     if creds and (not creds.valid or creds.expired) and creds.refresh_token:
-        creds.refresh(Request())
+        try:
+            creds.refresh(Request())
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            os.remove("token.json")
+            google_sync()
 
     with open("token.json", "w") as token:
         token.write(creds.to_json())
