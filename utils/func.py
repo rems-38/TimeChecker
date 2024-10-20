@@ -25,17 +25,17 @@ def google_sync():
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
 
-    if not creds:
-        flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-        creds = flow.run_local_server(port=0)
-    
-    if creds and (not creds.valid or creds.expired) and creds.refresh_token:
-        try:
-            creds.refresh(Request())
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            os.remove("token.json")
-            google_sync()
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                os.remove("token.json")
+                return google_sync()
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=0)
 
     with open("token.json", "w") as token:
         token.write(creds.to_json())
@@ -73,7 +73,7 @@ def timer_stop(service_google, start_time):
     print("Event added")
 
 
-def generate_report(service_google):
+def get_events(service_google):
     now = datetime.datetime.now()
     start = datetime.datetime(now.year, now.month, 1)
     end = start + relativedelta(months=1) - relativedelta(days=2)
@@ -88,10 +88,27 @@ def generate_report(service_google):
         orderBy="startTime",
         singleEvents=True,
     ).execute())
-    events = events_result.get("items", [])
+    
+    return events_result.get("items", [])
 
+def get_hours(service_google):
+    total = None
+    
+    events = get_events(service_google)
+    if events:
+        for event in events:
+            start = event["start"].get("dateTime", event["start"].get("date"))
+            end = event["end"].get("dateTime", event["end"].get("date"))
+            total = datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start) if total == None else total + (datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start))
+            
+    return total
+
+
+def generate_report(service_google):
+    events = get_events(service_google)
     if not events: return
 
+    now = datetime.datetime.now()
     total = datetime.timedelta()
     filename = "hours_report_" + now.strftime("%B") + ".csv"
     with open(filename, "w") as file:
