@@ -91,7 +91,7 @@ def get_events(service_google):
     
     return events_result.get("items", [])
 
-def get_hours(service_google):
+def get_hours(service_google) -> str:
     total = None
     
     events = get_events(service_google)
@@ -100,8 +100,8 @@ def get_hours(service_google):
             start = event["start"].get("dateTime", event["start"].get("date"))
             end = event["end"].get("dateTime", event["end"].get("date"))
             total = datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start) if total == None else total + (datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start))
-            
-    return total
+
+    return f"{total.days * 24 + total.seconds // 3600}:{(total.seconds % 3600) // 60}{total.seconds % 60}"
 
 
 def generate_report(service_google):
