@@ -126,6 +126,8 @@ def generate_report(service_google):
     msg["Subject"] = "Rapport mensuel"
     msg["From"] = formataddr((str(Header(get_json_key("name"), "utf-8")), get_json_key("email_user")))
     msg["To"] = get_json_key("email_recipient")
+    if get_json_key("email_cc"):
+        msg["Cc"] = get_json_key("email_cc")
 
     msg.add_alternative("<p>Veuillez trouver ci-joint le rapport détaillée de toutes les heures que j'ai effectuée durant ce mois.</p>" + get_json_key("email_signature"), subtype="html")
 

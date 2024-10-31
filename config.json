@@ -5,5 +5,6 @@
     "email_user": "john@my_office.com",
     "email_password": "SuperPaswword",
     "email_recipient": "alice@my_office.com",
+    "email_cc": ["email1@my_office.com", "email2@my_office.com"],
     "email_signature": "<div id=\"Signature\">...<div>"
 }
