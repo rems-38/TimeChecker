@@ -76,7 +76,7 @@ def timer_stop(service_google, start_time):
 def get_events(service_google):
     now = datetime.datetime.now()
     start = datetime.datetime(now.year, now.month, 1)
-    end = start + relativedelta(months=1) - relativedelta(days=2)
+    end = start + relativedelta(months=1)
 
     startIso = start.isoformat() + 'Z'
     endIso = end.isoformat() + 'Z'
@@ -105,11 +105,9 @@ def get_hours(service_google) -> str:
     
 
 def generate_report(service_google):
-    events = get_events(service_google)
-    if not events: return
-
     now = datetime.datetime.now()
     total = datetime.timedelta()
+
     filename = "hours_report_" + now.strftime("%B") + ".csv"
     with open(filename, "w") as file:
         file.write("N°,Début,Fin,Durée\n")
@@ -120,7 +118,6 @@ def generate_report(service_google):
             total += duration
  
         file.write(f"Total,,,{total.days * 24 + total.seconds // 3600}:{(total.seconds % 3600) // 60:02}:{total.seconds % 60:02}\n")
-
 
     msg = EmailMessage()
     msg["Subject"] = "Rapport mensuel"
