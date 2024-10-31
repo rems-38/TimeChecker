@@ -92,17 +92,17 @@ def get_events(service_google):
     return events_result.get("items", [])
 
 def get_hours(service_google) -> str:
-    total = None
+    infos = {"start": [], "end": [], "duration": []}
     
     events = get_events(service_google)
     if events:
         for event in events:
-            start = event["start"].get("dateTime", event["start"].get("date"))
-            end = event["end"].get("dateTime", event["end"].get("date"))
-            total = datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start) if total == None else total + (datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start))
-
-    return f"{total.days * 24 + total.seconds // 3600}:{(total.seconds % 3600) // 60}{total.seconds % 60}"
-
+            infos["start"] += [event["start"].get("dateTime", event["start"].get("date"))]
+            infos["end"] += [event["end"].get("dateTime", event["end"].get("date"))]
+            infos["duration"] += [datetime.datetime.fromisoformat(infos["end"][-1]) - datetime.datetime.fromisoformat(infos["start"][-1])]
+    
+    return infos
+    
 
 def generate_report(service_google):
     events = get_events(service_google)
@@ -113,19 +113,13 @@ def generate_report(service_google):
     filename = "hours_report_" + now.strftime("%B") + ".csv"
     with open(filename, "w") as file:
         file.write("N°,Début,Fin,Durée\n")
-        for nb, event in enumerate(events, 1):
-            start = event["start"].get("dateTime", event["start"].get("date"))
-            end = event["end"].get("dateTime", event["end"].get("date"))
-            duration = datetime.datetime.fromisoformat(end) - datetime.datetime.fromisoformat(start)
-            total += duration
-            
-            file.write(f"{nb},{start},{end},{duration}\n")
- 
 
-        hours = total.days * 24 + total.seconds // 3600
-        minutes = (total.seconds % 3600) // 60
-        seconds = total.seconds % 60
-        file.write(f"Total,,,{hours}:{minutes}:{seconds}\n")
+        infos = get_hours(service_google)
+        for nb, (start, end, duration) in enumerate(zip(infos["start"], infos["end"], infos["duration"]), 1):
+            file.write(f"{nb},{start},{end},{duration}\n")
+            total += duration
+ 
+        file.write(f"Total,,,{total.days * 24 + total.seconds // 3600}:{(total.seconds % 3600) // 60:02}:{total.seconds % 60:02}\n")
 
 
     msg = EmailMessage()

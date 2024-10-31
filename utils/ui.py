@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import customtkinter as tk
+import datetime
 
 from utils.func import google_sync, timer_start, timer_stop, generate_report, get_hours
 
@@ -48,8 +49,9 @@ class UI(tk.CTk):
 
 
     def get_hours(self):
-        hours = get_hours(self.service_google)
-        print(hours)
+        infos = get_hours(self.service_google)
+        total = sum(infos["duration"], datetime.timedelta())
+        print(f"{total.days * 24 + total.seconds // 3600}:{(total.seconds % 3600) // 60:02}:{total.seconds % 60:02}")
 
     def generate_report(self):
         generate_report(self.service_google)
