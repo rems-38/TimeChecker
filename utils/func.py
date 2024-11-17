@@ -53,6 +53,8 @@ def get_json_key(key):
 
 def timer_start():
     print("Timer start")
+    with open("tmp.txt", "w") as file:
+        file.write(str(datetime.datetime.now()))
     return datetime.datetime.now()
 
 
@@ -70,6 +72,9 @@ def timer_stop(service_google, start_time):
     except HttpError as e:
         print(f"An error occurred: {e}")
     
+    if os.path.exists("tmp.txt"):
+        os.remove("tmp.txt")
+
     print("Event added")
 
 
@@ -90,6 +95,7 @@ def get_events(service_google):
     ).execute())
     
     return events_result.get("items", [])
+
 
 def get_hours(service_google) -> str:
     infos = {"start": [], "end": [], "duration": []}
@@ -140,3 +146,10 @@ def generate_report(service_google):
     os.remove(filename)
     
     print("Report sent")
+
+
+def is_time():
+    if os.path.exists("tmp.txt"):
+        with open("tmp.txt", "r") as file:
+            return datetime.datetime.fromisoformat(file.read())
+    return None

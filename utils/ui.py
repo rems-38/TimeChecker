@@ -3,7 +3,7 @@
 import customtkinter as tk
 import datetime
 
-from utils.func import google_sync, timer_start, timer_stop, generate_report, get_hours
+from utils.func import google_sync, timer_start, timer_stop, generate_report, get_hours, is_time
 
 class UI(tk.CTk):
 
@@ -22,7 +22,11 @@ class UI(tk.CTk):
 
         self.quit_button = tk.CTkButton(self, text="Quitter", command=self.quit)
 
-        self.play_button = tk.CTkButton(self, text="▶️", font=("Arial", 24), command=self.timer_start)
+        self.start_time = is_time()
+        if self.start_time:
+            self.play_button = tk.CTkButton(self, text="⏸️", font=("Arial", 24), command=self.timer_stop)
+        else:
+            self.play_button = tk.CTkButton(self, text="▶️", font=("Arial", 24), command=self.timer_start)
 
         self.get_hours_button = tk.CTkButton(self, text="Obtenir le nombre d'heures", command=self.get_hours)
         self.report_button = tk.CTkButton(self, text="Générer le rapport mensuel", command=self.generate_report)
@@ -37,6 +41,7 @@ class UI(tk.CTk):
 
     def google_sync(self):
         self.service_google = google_sync()
+        self.sync_button.configure(text="Synchronisation terminée", state="disabled")
 
 
     def timer_start(self):
